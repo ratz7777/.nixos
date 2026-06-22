@@ -35,6 +35,41 @@
     efi.canTouchEfiVariables = true;
   };
 
+  boot.supportedFilesystems = ["ntfs"];
+
+  swapDevices = [
+    { 
+      device = "/var/lib/swapfile";
+      size = 16 * 1024; # Size is specified in megabytes (10240 MB)
+    }
+  ];
+
+
+  fileSystems."/mnt/windows" = {
+  device = "/dev/disk/by-uuid/01DBEDD9EDB7E660";
+  fsType = "ntfs3";
+  options = [
+    "rw"
+    "nofail"            # Prevents boot failure if the drive is disconnected
+    "windows_names"     # Optional: Prevents invalid characters for Windows compatibility
+    ];
+  };
+
+  fileSystems."/mnt/dacha_nas" = {
+  device = "//192.168.3.71/512gb";
+  fsType = "cifs";
+  options = [
+    "x-systemd.automount" # Mounts automatically on access
+    "noauto"              # Do not mount at boot time
+    "x-systemd.idle-timeout=60" # Unmounts after 60 seconds of inactivity
+    
+    "guest"
+
+    "uid=1000"
+    "gid=100"
+    ];
+  };
+
   #sound
 
   security.rtkit.enable = true;
@@ -83,7 +118,6 @@
 
   # Time and locale
   time = {
-    hardwareClockInLocalTime = true;
     timeZone = "Europe/Moscow";
   };
   i18n = {
@@ -120,7 +154,7 @@
     };
     desktopManager.plasma6.enable = true;
 
-    displayManager.defaultSession = "plasmawayland";
+    displayManager.defaultSession = "plasma";
 
     greetd = {
       enable = true;
@@ -182,7 +216,8 @@
         "networkmanager"
         "video"
         "audio"
-        "seat"
+	"seat"
+	"dialout"
       ];
     };
     megalis = {
@@ -246,6 +281,7 @@
     #terminal bloat
     cmatrix
     cava
+    ratty
 
     #misc
     unrar
@@ -329,6 +365,10 @@
       hinting = {
         enable = true;
         autohint = true;
+      };
+      antialias = true;
+      subpixel = {
+	rgba = "none";
       };
     };
 
