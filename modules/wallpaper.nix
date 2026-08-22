@@ -16,7 +16,7 @@ let
     CURRENT_HOUR=$(date +%H)
 
     # Determine color based on time (Day: 08:00 to 21:59, Night: 22:00 to 07:59)
-    if [ "$CURRENT_HOUR" -ge 8 ] && [ "$CURRENT_HOUR" -lt 22 ]; then
+    if [ "$CURRENT_HOUR" -ge 6 ] && [ "$CURRENT_HOUR" -lt 22 ]; then
         COLOR="white"
     else
         COLOR="black"
@@ -49,7 +49,7 @@ in
     description = "Check and update wallpaper periodially";
     timerConfig = {
       # Runs at 08:00, 22:00, and immediately upon login if missed
-      OnCalendar = [ "*-*-* 08:00:00" "*-*-* 22:00:00" ];
+      OnCalendar = [ "*-*-* 06:00:00" "*-*-* 22:00:00" ];
       OnStartupSec = "10s"; 
       Persistent = true;
     };

@@ -98,7 +98,7 @@
 
   services.printing = {
     enable = true;
-    drivers = [ pkgs.hplipWithPlugin ];
+    drivers = [ pkgs-stable.hplipWithPlugin ];
   };
 
   musnix.enable = true;
@@ -189,7 +189,7 @@
     };
   };
 
-  # for teamspeak
+  # /elifor teamspeak
   programs.appimage = {
     enable = true;
     binfmt = true;
@@ -215,7 +215,8 @@
         "wheel"
         "networkmanager"
         "video"
-        "audio"
+        "realtime"
+	"audio"
 	"seat"
 	"dialout"
       ];
@@ -241,6 +242,12 @@
   #  '';
 
   # System-wide packages
+
+  environment.plasma6.excludePackages = with pkgs.kdePackages; [
+      elisa
+  ];
+
+
   environment.systemPackages = with pkgs; [
 
     #edu
@@ -252,6 +259,7 @@
 
     # Editors and development
     vscode
+    tmux
 
     nixfmt
     nil
@@ -285,8 +293,12 @@
 
     #misc
     unrar
-    ncdu
     qbittorrent-enhanced
+    gdu
+    vicinae
+
+    #audio
+    pkgs-stable.reaper
 
     #video
     obs-studio
@@ -302,7 +314,7 @@
     (makeDesktopItem {
       name = "PrismLauncher";
       desktopName = "PrismLauncher";
-      exec = "appimage-run /home/ratz/.prismAppimage/PrismLauncher-Linux-x86_64.AppImage";
+      exec = "QT_SCALE_FACTOR=1.333 appimage-run /home/ratz/.prismAppimage/PrismLauncher-Linux-x86_64.AppImage";
       icon = "prism";
       comment = "minecraft launcher";
       type = "Application";
