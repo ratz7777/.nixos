@@ -26,12 +26,19 @@
     "flakes"
   ];
 
-  # Allow unfree packages
   nixpkgs.config.allowUnfree = true;
 
-  # Boot configuration
   boot.loader = {
-    systemd-boot.enable = true;
+    grub = {
+      enable = true;
+      device = "nodev";
+      efiSupport = true;
+      useOSProber =  true;
+      backgroundColor = "#000000";
+      theme = null;
+      splashImage = null;
+  };
+    timeout = null;
     efi.canTouchEfiVariables = true;
   };
 
@@ -40,20 +47,20 @@
   swapDevices = [
     { 
       device = "/var/lib/swapfile";
-      size = 16 * 1024; # Size is specified in megabytes (10240 MB)
+      size = 16 * 1024;
     }
   ];
 
 
-  fileSystems."/mnt/windows" = {
-  device = "/dev/disk/by-uuid/01DBEDD9EDB7E660";
-  fsType = "ntfs3";
-  options = [
-    "rw"
-    "nofail"            # Prevents boot failure if the drive is disconnected
-    "windows_names"     # Optional: Prevents invalid characters for Windows compatibility
-    ];
-  };
+#fileSystems."/mnt/windows" = {
+#  device = "/dev/disk/by-uuid/01DBEDD9EDB7E660";
+#  fsType = "ntfs3";
+#  options = [
+#    "rw"
+#    "nofail"            # Prevents boot failure if the drive is disconnected
+#    "windows_names"     # Optional: Prevents invalid characters for Windows compatibility
+#    ];
+#  };
 
   fileSystems."/mnt/dacha_nas" = {
   device = "//192.168.3.71/512gb";
@@ -96,12 +103,19 @@
     };
   };
 
+  hardware.sane = {
+  enable = true;
+  extraBackends = [ pkgs-stable.hplipWithPlugin ];
+  };
+
   services.printing = {
     enable = true;
     drivers = [ pkgs-stable.hplipWithPlugin ];
   };
 
   musnix.enable = true;
+  
+  programs.noisetorch.enable = true;
 
   # Network configuration
   networking = {
@@ -146,6 +160,11 @@
       open = false;
     };
   };
+
+  environment.etc."xdg/kdeglobals".text = ''
+    [General]
+    MiddleClickPaste=false
+  '';
 
   services = {
     xserver = {
@@ -219,6 +238,8 @@
 	"audio"
 	"seat"
 	"dialout"
+	"scanner"
+	"lp"
       ];
     };
     megalis = {
@@ -229,6 +250,9 @@
         "video"
         "audio"
         "seat"
+	"dialout"
+        "scanner"
+	"lp"
       ];
     };
   };
@@ -249,6 +273,11 @@
 
 
   environment.systemPackages = with pkgs; [
+    
+    tuptime
+
+    #scanner
+    kdePackages.skanpage
 
     #edu
     (python3.withPackages (ps: [ ps.tkinter ]))
@@ -362,34 +391,48 @@
   # Fonts
 
   fonts = {
-    fontconfig = {
-      defaultFonts = {
-        monospace = [
-          "Consoleet Terminus-32 Smooth"
-        ];
-        sansSerif = [
-          "Consoleet Terminus-32 Smooth"
-        ];
-        serif = [
-          "Consoleet Terminus-32 Smooth"
-        ];
-      };
-      hinting = {
-        enable = true;
-        autohint = true;
-      };
-      antialias = true;
-      subpixel = {
-	rgba = "none";
-      };
+  fontconfig = {
+    defaultFonts = {
+      monospace = [
+	"Consoleet Terminus\-32 Smooth"
+        "Noto Sans Mono"
+      ];
+      sansSerif = [
+	"Consoleet Terminus\-32 Smooth"
+        "Noto Sans"
+      ];
+      serif = [
+	"Consoleet Terminus\-32 Smooth"
+        "Noto Serif"
+      ];
     };
 
-    packages = with pkgs; [
-      terminus_font
-      terminus_font_ttf
+    hinting = {
+      enable = true;
+      autohint = true;
+    };
+    antialias = true;
+    subpixel = {
+    rgba = "none";
+    };
+  };
+
+  packages = (with pkgs; [
+    noto-fonts
+    dejavu_fonts
+    terminus_font
+  ]) ++ [
+    (pkgs.stdenvNoCC.mkDerivation {
+      name = "consoleet-fonts";
+      src = ./fonts; 
+      installPhase = ''
+        mkdir -p $out/share/fonts/opentype
+        cp -r $src/*.otf $out/share/fonts/opentype/
+      '';
+      })
     ];
   };
 
-  system.stateVersion = "25.11";
+system.stateVersion = "25.11";
 
 }
